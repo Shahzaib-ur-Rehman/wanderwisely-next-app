@@ -1,16 +1,15 @@
 import { Inter } from "next/font/google";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
-
 export default function Home() {
   const [Place, setPlace] = useState("");
   const [Days, setDays] = useState("");
 
   const [Result, setResult] = useState("");
-
-  const generateBio = async () => {
-    setResult("")
+  const generateResult = async (event) => {
+    event.preventDefault();
+    setResult("");
     const content = `
     Generate a plan of ${Days} days of tour to ${Place}, also give me website links of each place for guide`;
 
@@ -46,67 +45,42 @@ export default function Home() {
     }
   };
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div>
-        <label
-          htmlFor="place"
-          className="block text-sm font-medium leading-6 text-gray-900"
-        >
-          Place
-        </label>
-        <div className="relative mt-2 rounded-md shadow-sm">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"></div>
+    <Fragment>
+      <header>
+        <div id="background" className="background">
+          <video autoPlay loop muted playsinline>
+            <source src="images/ww-720p.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div id="logo" className="logo">
+          Wander Wisely
+        </div>
+        <form id="form" onSubmit={generateResult}>
           <input
             type="text"
-            name="place"
-            id="place"
             value={Place}
             onChange={(e) => {
               setPlace(e.target.value);
             }}
-            className="block w-full rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholder="Lahore , Karachi , Kashmir"
+            id="place"
+            placeholder="Where are you going?"
           />
-        </div>
-      </div>
-      <div>
-        <label
-          htmlFor="days"
-          className="block text-sm font-medium leading-6 text-gray-900"
-        >
-          Days
-        </label>
-        <div className="relative mt-2 rounded-md shadow-sm">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"></div>
           <input
             type="text"
-            name="days"
-            id="days"
             value={Days}
             onChange={(e) => {
               setDays(e.target.value);
             }}
-            className="block w-full rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholder="Lahore , Karachi , Kashmir"
+            id="days"
+            placeholder="For how many days?"
           />
-        </div>
-      </div>
-
-      <button
-        type="button"
-        className="mt-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-        onClick={generateBio}
-      >
-        Generate Response
-      </button>
-
-      {/* <button className="rounded-full" onClick={generateBio}>
-        Generate Response
-      </button> */}
-      <p></p>
-      {Result}
-    </main>
+          <button type="submit">
+            <span className="icon-write"></span>Create Itinerary
+          </button>
+        </form>
+      </header>
+      <section id="itinerary">{Result}</section>
+      <footer>Copyright © 2023 Wander Wisely.</footer>
+    </Fragment>
   );
 }
