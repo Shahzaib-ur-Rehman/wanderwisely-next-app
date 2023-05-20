@@ -15,13 +15,13 @@ export async function OpenAIStream(payload) {
     body: JSON.stringify(payload),
   });
 
+
   const stream = new ReadableStream({
     async start(controller) {
       // callback
       function onParse(event) {
         if (event.type === "event") {
           const data = event.data;
-          // https://beta.openai.com/docs/api-reference/completions/create#completions/create-stream
           if (data === "[DONE]") {
             controller.close();
             return;
@@ -29,13 +29,13 @@ export async function OpenAIStream(payload) {
           try {
             const json = JSON.parse(data);
             const text = json.choices[0].delta?.content || "";
-            if (counter < 2 && (text.match(/\n/) || []).length) {
-              // this is a prefix character (i.e., "\n\n"), do nothing
-              return;
-            }
+            // if (counter < 2 && (text.match(/\n/) || []).length) {
+            //   // this is a prefix character (i.e., "\n\n"), do nothing
+            //   return;
+            // }
             const queue = encoder.encode(text);
             controller.enqueue(queue);
-            counter++;
+            // counter++;
           } catch (e) {
             // maybe parse error
             controller.error(e);
