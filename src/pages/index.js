@@ -1,18 +1,27 @@
 import { Inter } from "next/font/google";
-import { Fragment, useState } from "react";
-
+import { Fragment, useEffect, useState } from "react";
+import parse from "html-react-parser";
+const options = {
+  replace: (domNode) => {
+    if (domNode.attribs && domNode.attribs.class === "remove") {
+      return <></>;
+    }
+  },
+};
+const regex = /Day (\d+):([\s\S]*?)(?=Day \d+:|$)/g;
+const regexConetnt =
+  /(Morning|Afternoon|Night)\s*-\s*([\s\S]*?)(?=(Morning|Afternoon|Night)|$)/g;
 const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
   const [Place, setPlace] = useState("");
   const [Days, setDays] = useState("");
 
   const [Result, setResult] = useState("");
+  const [DayWisePlace, setDayWisePlace] = useState([]);
   const generateResult = async (event) => {
     event.preventDefault();
     setResult("");
-    const content = `
-    Generate a plan of ${Days} days of tour to ${Place}, also give me website links of each place for guide`;
-
+    const content = `${Days} days trip plan for ${Place} morning , afternoon and night `;
     const response = await fetch("/api/gptapi", {
       method: "POST",
       headers: {
@@ -44,6 +53,37 @@ export default function Home() {
       setResult((prev) => prev + chunkValue);
     }
   };
+
+  const extractContent = (matches) => {
+    const sections = [];
+    for (const match of matches) {
+      const section = {
+        time: match[1],
+        content: match[2].trim(),
+      };
+      sections.push(section);
+    }
+    return sections;
+  };
+
+  useEffect(() => {
+    const matches = Result.matchAll(regex);
+    const days = [];
+    for (const match of matches) {
+      let matches = match[2].trim().matchAll(regexConetnt);
+      console.log(matches);
+      const day = {
+        number: match[1],
+        content: match[2].trim(),
+        //? extractContent(matches):[],
+      };
+      days.push(day);
+    }
+    setDayWisePlace(days);
+  }, [Result]);
+
+  console.log(DayWisePlace);
+
   return (
     <Fragment>
       <header>
@@ -79,7 +119,30 @@ export default function Home() {
           </button>
         </form>
       </header>
-      <section id="itinerary">{Result}</section>
+      <section id="itinerary">
+        <div id="about" class="about">
+          {DayWisePlace.map((plan) => {
+            const currentDate = new Date();
+            const options = { month: 'long', day: 'numeric' };
+            const formattedDate = currentDate.toLocaleString('en-US', options);
+
+            return (
+              <div className="wrapper" key={plan.number}>
+                <h2 class="text-center">
+                  <strong>DAY {plan.number} : </strong>
+                  <small class="text-center">{formattedDate}</small>
+                </h2>
+                <br></br>
+                <div class="col-8 mx-auto">
+                  <p>
+                    {plan.content}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
       <footer>Copyright © 2023 Wander Wisely.</footer>
     </Fragment>
   );
