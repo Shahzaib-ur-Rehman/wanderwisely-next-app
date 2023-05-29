@@ -1,6 +1,15 @@
+import Content from "../components/Content";
 import { Inter } from "next/font/google";
 import { Fragment, useEffect, useState } from "react";
-import parse from "html-react-parser";
+import {
+  FackBookSVG,
+  TwitterSVG,
+  InstagramSVG,
+  LinkedinSVG,
+  WhatsappSVG,
+  Check,
+} from "../../public/svgs/icons";
+
 const options = {
   replace: (domNode) => {
     if (domNode.attribs && domNode.attribs.class === "remove") {
@@ -13,6 +22,7 @@ const regexConetnt =
   /(Morning|Afternoon|Night)\s*-\s*([\s\S]*?)(?=(Morning|Afternoon|Night)|$)/g;
 const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
+  const [ShowDetail, setShowDetail] = useState(false);
   const [Place, setPlace] = useState("");
   const [Days, setDays] = useState("");
 
@@ -46,6 +56,7 @@ export default function Home() {
     const decoder = new TextDecoder();
     let done = false;
 
+    setShowDetail(true);
     while (!done) {
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
@@ -71,7 +82,6 @@ export default function Home() {
     const days = [];
     for (const match of matches) {
       let matches = match[2].trim().matchAll(regexConetnt);
-      console.log(matches);
       const day = {
         number: match[1],
         content: match[2].trim(),
@@ -82,11 +92,113 @@ export default function Home() {
     setDayWisePlace(days);
   }, [Result]);
 
-  console.log(DayWisePlace);
-
   return (
     <Fragment>
-      <header>
+      <header id="header" className="d-flex align-items-center">
+        <div className="social-links text-left custom-links">
+          <a href="#" className="twitter">
+            <TwitterSVG />
+          </a>
+          <a href="#" className="facebook">
+            <FackBookSVG />
+          </a>
+          <a href="#" className="instagram">
+            <InstagramSVG />
+          </a>
+          <a href="#" className="linkedin">
+            <LinkedinSVG />
+          </a>
+          <a href="#" className="whatsapp">
+            <WhatsappSVG />
+          </a>
+        </div>
+
+        <div className="social-links text-left custom-login">
+          <button type="button" className="btn btn-danger mt-2">
+            Login
+          </button>
+        </div>
+
+        <div className="container d-flex flex-column align-items-center">
+          <h1>Wander Wisely</h1>
+          <h5>Your personal AI travel planner</h5>
+
+          <div className="subscribe">
+            <form onSubmit={generateResult} className="php-email-form">
+              <div className="subscribe-form">
+                <input
+                  type="text"
+                  value={Place}
+                  onChange={(event) => {
+                    setPlace(event.target.value);
+                  }}
+                  name="text"
+                  placeholder="Where to?"
+                />
+                <input
+                  type="text"
+                  value={Days}
+                  onChange={(event) => {
+                    setDays(event.target.value);
+                  }}
+                  name="text"
+                  placeholder="how many days you want to s?"
+                />
+                <input type="submit" value="Let's Go" />
+              </div>
+              <div className="mt-2">
+                <div className="loading">Loading</div>
+                <div className="error-message"></div>
+                <div className="sent-message">
+                  Your notification request was sent. Thank you!
+                </div>
+              </div>
+            </form>
+            <h6>Hmm, you sure that is a real place?</h6>
+          </div>
+        </div>
+      </header>
+      {!ShowDetail && (
+        <section id="about" className="about mt-2 mb-5">
+          <div className="container">
+            <div className="row content">
+              <div className="col-lg-6">
+                <h2>Recent Searches</h2>
+                <h3>
+                  Voluptatem dignissimos provident quasi corporis voluptates sit
+                  assum perenda sruen jonee trave
+                </h3>
+              </div>
+              <div className="col-lg-6 pt-4 pt-lg-0">
+                <ul>
+                  <li>
+                    <Check /> Azad Kashmir Tour{" "}
+                  </li>
+                  <li>
+                    <Check /> Neelum Valley Azad Kashmir Tour{" "}
+                  </li>
+                  <li>
+                    <Check /> THE 10 BEST Kashmir Tours
+                  </li>
+                  <li>
+                    <Check /> Azad Kashmir Tour{" "}
+                  </li>
+                  <li>
+                    <Check /> Neelum Valley Azad Kashmir Tour{" "}
+                  </li>
+                  <li>
+                    <Check /> THE 10 BEST Kashmir Tours
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {ShowDetail && <Content DayWisePlace={DayWisePlace} />}
+
+      {/* <header>
         <div id="background" className="background">
           <video autoPlay loop muted playsinline>
             <source src="images/ww-720p.mp4" type="video/mp4" />
@@ -120,20 +232,20 @@ export default function Home() {
         </form>
       </header>
       <section id="itinerary">
-        <div id="about" class="about">
-          {DayWisePlace.map((plan) => {
-            const currentDate = new Date();
+        <div id="about" className="about">
+          {DayWisePlace.map((plan, index) => {
+            const currentDate = new Date()+index+1;
             const options = { month: 'long', day: 'numeric' };
             const formattedDate = currentDate.toLocaleString('en-US', options);
 
             return (
               <div className="wrapper" key={plan.number}>
-                <h2 class="text-center">
+                <h2 className="text-center">
                   <strong>DAY {plan.number} : </strong>
-                  <small class="text-center">{formattedDate}</small>
+                  <small className="text-center">{formattedDate}</small>
                 </h2>
                 <br></br>
-                <div class="col-8 mx-auto">
+                <div className="col-8 mx-auto">
                   <p>
                     {plan.content}
                   </p>
@@ -143,7 +255,7 @@ export default function Home() {
           })}
         </div>
       </section>
-      <footer>Copyright © 2023 Wander Wisely.</footer>
+      <footer>Copyright © 2023 Wander Wisely.</footer> */}
     </Fragment>
   );
 }
